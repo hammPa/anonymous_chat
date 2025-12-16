@@ -1,5 +1,7 @@
 const { mengandungKataKasar } = require("../../utils/sensorBahasa");
 const Pesan = require("../../model/Pesan");
+const Subscription = require("../../model/Subscription");
+const { kirimEmail } = require("../../utils/emailService");
 
 function chatHandler(socket, io, context) {
 
@@ -29,6 +31,20 @@ function chatHandler(socket, io, context) {
       pengirimAnonim: `Anonim ${context.idAnonim}`,
       isi
     });
+
+
+
+
+
+    const subscriberList = await Subscription.find({ postId });
+
+    for (const sub of subscriberList) {
+      await kirimEmail(
+        sub.email,
+        "Ada curhatan baru",
+        `Ada pesan baru di post yang kamu ikuti:\n\n"${isi}"`
+      );
+    }
   });
 }
 

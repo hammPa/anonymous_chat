@@ -1,6 +1,7 @@
 // socket/post.handler.js
 const Post = require("../../model/Post");
 const Pesan = require("../../model/Pesan");
+const Subscription = require("../../model/Subscription");
 
 function postHandler(socket, io, context) {
 
@@ -77,6 +78,34 @@ function postHandler(socket, io, context) {
       pesan: `Anonim ${context.idAnonim} keluar dari post`
     });
   });
+
+
+
+  socket.on("subscribe_post", async (data) => {
+    const postId = data?.postId;
+    const email = (data?.email || "").trim();
+
+    if (!postId || !email) return;
+
+    const sudahAda = await Subscription.findOne({ postId, email });
+    if (sudahAda) {
+      socket.emit("subscribe_gagal", {
+        pesan: "Email sudah terdaftar pada post ini"
+      });
+      return;
+    }
+
+    await Subscription.create({
+      postId,
+      email,
+      idAnonim: context.idAnonim
+    });
+
+    socket.emit("subscribe_berhasil", {
+      pesan: "Berhasil subscribe notifikasi email"
+    });
+  });
+
 }
 
 module.exports = postHandler;
