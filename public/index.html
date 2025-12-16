@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat Curhat Anonim</title>
+</head>
+<body>
+
+  <h2>Chat Curhat Anonim</h2>
+
+  <!-- Status user online -->
+  <p id="online"></p>
+
+  <!-- Notifikasi sistem -->
+  <div id="notifikasi" style="color: blue; font-style: italic;"></div>
+
+  <!-- Kotak chat -->
+  <div id="kotakChat" style="border: 1px solid #ccc; padding: 10px; height: 200px; overflow-y: auto;"></div>
+
+  <!-- Typing indicator -->
+  <p id="indikatorMengetik" style="font-style: italic; color: gray;"></p>
+
+  <!-- Input pesan -->
+  <input id="inputPesan" placeholder="Tulis pesan..." />
+  <button onclick="kirim()">Kirim</button>
+
+  <!-- Socket.io client -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+  <script>
+    /* ============================================================
+       SETUP CLIENT ID (dummy, per tab)
+       ============================================================ */
+    const clientId =
+      sessionStorage.getItem("client_id") || crypto.randomUUID();
+    sessionStorage.setItem("client_id", clientId);
+
+    /* ============================================================
+       KONEKSI SOCKET
+       ============================================================ */
+    const socket = io("http://localhost:3000");
+
+    /* ============================================================
+       ELEMENT DOM
+       ============================================================ */
+    const kotakChat = document.getElementById("kotakChat");
+    const inputPesan = document.getElementById("inputPesan");
+    const indikator = document.getElementById("indikatorMengetik");
+    const notifikasi = document.getElementById("notifikasi");
+    const online = document.getElementById("online");
+
+    /* ============================================================
+       IDENTITAS USER
+       ============================================================ */
+    let idAnonimSaya = null;
+
+    socket.on("connect", () => {
+      socket.emit("daftar_user", {
+        client_id: clientId
+      });
+    });
+
+    socket.on("identitas_user", (data) => {
+      idAnonimSaya = data.idAnonim;
+      tampilkan(`Kamu adalah Anonim ${idAnonimSaya}`);
+    });
+
+    /* ============================================================
+       FUNGSI TAMPIL PESAN
+       ============================================================ */
+    function tampilkan(teks) {
+      const p = document.createElement("p");
+      p.innerText = teks;
+      kotakChat.appendChild(p);
+      kotakChat.scrollTop = kotakChat.scrollHeight;
+    }
+
+    /* ============================================================
+       KIRIM PESAN
+       ============================================================ */
+    function kirim() {
+      if (!inputPesan.value.trim()) return;
+
+      socket.emit("kirim_pesan", {
+        isi_pesan: inputPesan.value
+      });
+
+      // hentikan typing indicator
+      socket.emit("berhenti_mengetik");
+      sedangMengetik = false;
+
+      inputPesan.value = "";
+    }
+
+    /* ============================================================
+       TERIMA PESAN & BOT
+       ============================================================ */
+    socket.on("pesan_baru", (data) => {
+      tampilkan(`${data.dari}: ${data.isi}`);
+    });
+
+    socket.on("balasan_bot", (data) => {
+      tampilkan(`${data.dari}: ${data.isi}`);
+    });
+
+    /* ============================================================
+       USER ONLINE
+       ============================================================ */
+    socket.on("user_online", (data) => {
+      online.innerText = "User online: " + data.jumlah;
+    });
+
+    /* ============================================================
+       TYPING INDICATOR
+       ============================================================ */
+    let sedangMengetik = false;
+    let timeoutMengetik = null;
+
+    inputPesan.addEventListener("input", () => {
+      if (!sedangMengetik) {
+        sedangMengetik = true;
+        socket.emit("mulai_mengetik");
+      }
+
+      clearTimeout(timeoutMengetik);
+      timeoutMengetik = setTimeout(() => {
+        sedangMengetik = false;
+        socket.emit("berhenti_mengetik");
+      }, 1000);
+    });
+
+    socket.on("user_mengetik", (data) => {
+      indikator.innerText = data.pesan;
+    });
+
+    socket.on("user_berhenti_mengetik", () => {
+      indikator.innerText = "";
+    });
+
+    /* ============================================================
+       NOTIFIKASI SISTEM
+       ============================================================ */
+    socket.on("notifikasi_sistem", (data) => {
+      notifikasi.innerText = data.pesan;
+
+      setTimeout(() => {
+        notifikasi.innerText = "";
+      }, 3000);
+    });
+  </script>
+
+</body>
+</html>
