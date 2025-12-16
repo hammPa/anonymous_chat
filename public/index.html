@@ -6,148 +6,159 @@
 </head>
 <body>
 
-  <h2>Chat Curhat Anonim</h2>
+<h2>Chat Curhat Anonim</h2>
 
-  <!-- Status user online -->
-  <p id="online"></p>
+<p id="online"></p>
+<div id="notifikasi" style="color: blue; font-style: italic;"></div>
 
-  <!-- Notifikasi sistem -->
-  <div id="notifikasi" style="color: blue; font-style: italic;"></div>
+<hr>
 
-  <!-- Kotak chat -->
-  <div id="kotakChat" style="border: 1px solid #ccc; padding: 10px; height: 200px; overflow-y: auto;"></div>
+<h3>Buat Post</h3>
+<input id="judulPost" placeholder="Judul post" />
+<button onclick="buatPost()">Buat</button>
 
-  <!-- Typing indicator -->
-  <p id="indikatorMengetik" style="font-style: italic; color: gray;"></p>
+<h3>Daftar Post</h3>
+<ul id="daftarPost"></ul>
 
-  <!-- Input pesan -->
-  <input id="inputPesan" placeholder="Tulis pesan..." />
-  <button onclick="kirim()">Kirim</button>
+<hr>
 
-  <!-- Socket.io client -->
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<h3 id="judulAktif">Belum masuk post</h3>
+<button onclick="keluarPost()">Keluar Post</button>
 
-  <script>
-    /* ============================================================
-       SETUP CLIENT ID (dummy, per tab)
-       ============================================================ */
-    const clientId =
-      sessionStorage.getItem("client_id") || crypto.randomUUID();
-    sessionStorage.setItem("client_id", clientId);
+<div id="kotakChat" style="border:1px solid #ccc; height:200px; overflow-y:auto;"></div>
+<p id="indikatorMengetik" style="font-style:italic;color:gray;"></p>
 
-    /* ============================================================
-       KONEKSI SOCKET
-       ============================================================ */
-    const socket = io("http://localhost:3000");
+<input id="inputPesan" placeholder="Tulis pesan..." />
+<button onclick="kirim()">Kirim</button>
 
-    /* ============================================================
-       ELEMENT DOM
-       ============================================================ */
-    const kotakChat = document.getElementById("kotakChat");
-    const inputPesan = document.getElementById("inputPesan");
-    const indikator = document.getElementById("indikatorMengetik");
-    const notifikasi = document.getElementById("notifikasi");
-    const online = document.getElementById("online");
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+/* ===== client id ===== */
+const clientId =
+  sessionStorage.getItem("client_id") || crypto.randomUUID();
+sessionStorage.setItem("client_id", clientId);
 
-    /* ============================================================
-       IDENTITAS USER
-       ============================================================ */
-    let idAnonimSaya = null;
+/* ===== socket ===== */
+const socket = io("http://localhost:3000");
 
-    socket.on("connect", () => {
-      socket.emit("daftar_user", {
-        client_id: clientId
-      });
-    });
+/* ===== state ===== */
+let postAktif = null;
 
-    socket.on("identitas_user", (data) => {
-      idAnonimSaya = data.idAnonim;
-      tampilkan(`Kamu adalah Anonim ${idAnonimSaya}`);
-    });
+/* ===== DOM ===== */
+const kotakChat = document.getElementById("kotakChat");
+const inputPesan = document.getElementById("inputPesan");
+const indikator = document.getElementById("indikatorMengetik");
+const notifikasi = document.getElementById("notifikasi");
+const online = document.getElementById("online");
+const daftarPostEl = document.getElementById("daftarPost");
+const judulAktif = document.getElementById("judulAktif");
 
-    /* ============================================================
-       FUNGSI TAMPIL PESAN
-       ============================================================ */
-    function tampilkan(teks) {
-      const p = document.createElement("p");
-      p.innerText = teks;
-      kotakChat.appendChild(p);
-      kotakChat.scrollTop = kotakChat.scrollHeight;
-    }
+/* ===== identitas ===== */
+socket.on("connect", () => {
+  socket.emit("daftar_user", { client_id: clientId });
+  socket.emit("ambil_daftar_post");
+});
 
-    /* ============================================================
-       KIRIM PESAN
-       ============================================================ */
-    function kirim() {
-      if (!inputPesan.value.trim()) return;
+socket.on("identitas_user", (data) => {
+  tampilkan(`Kamu adalah Anonim ${data.idAnonim}`);
+});
 
-      socket.emit("kirim_pesan", {
-        isi_pesan: inputPesan.value
-      });
+/* ===== util ===== */
+function tampilkan(teks) {
+  const p = document.createElement("p");
+  p.innerText = teks;
+  kotakChat.appendChild(p);
+  kotakChat.scrollTop = kotakChat.scrollHeight;
+}
 
-      // hentikan typing indicator
-      socket.emit("berhenti_mengetik");
-      sedangMengetik = false;
+/* ===== post ===== */
+function buatPost() {
+  const judul = document.getElementById("judulPost").value;
+  socket.emit("buat_post", { judul });
+}
 
-      inputPesan.value = "";
-    }
+function masukPost(id, judul) {
+  socket.emit("masuk_post", { postId: id });
+  judulAktif.innerText = judul;
+  kotakChat.innerHTML = "";
+}
 
-    /* ============================================================
-       TERIMA PESAN & BOT
-       ============================================================ */
-    socket.on("pesan_baru", (data) => {
-      tampilkan(`${data.dari}: ${data.isi}`);
-    });
+function keluarPost() {
+  socket.emit("keluar_post");
+  postAktif = null;
+  judulAktif.innerText = "Belum masuk post";
+  kotakChat.innerHTML = "";
+}
 
-    socket.on("balasan_bot", (data) => {
-      tampilkan(`${data.dari}: ${data.isi}`);
-    });
+socket.on("post_dibuat", (data) => {
+  postAktif = data.postId;
+  judulAktif.innerText = data.judul;
+  kotakChat.innerHTML = "";
+});
 
-    /* ============================================================
-       USER ONLINE
-       ============================================================ */
-    socket.on("user_online", (data) => {
-      online.innerText = "User online: " + data.jumlah;
-    });
+socket.on("berhasil_masuk_post", (data) => {
+  postAktif = data.postId;
+  judulAktif.innerText = data.judul;
+  kotakChat.innerHTML = "";
+});
 
-    /* ============================================================
-       TYPING INDICATOR
-       ============================================================ */
-    let sedangMengetik = false;
-    let timeoutMengetik = null;
+socket.on("daftar_post", (posts) => {
+  daftarPostEl.innerHTML = "";
+  posts.forEach(p => {
+    const li = document.createElement("li");
+    li.innerHTML = `${p.judul} (${p.pembuat}) 
+      <button onclick="masukPost('${p.id}', '${p.judul}')">Masuk</button>`;
+    daftarPostEl.appendChild(li);
+  });
+});
 
-    inputPesan.addEventListener("input", () => {
-      if (!sedangMengetik) {
-        sedangMengetik = true;
-        socket.emit("mulai_mengetik");
-      }
+/* ===== chat ===== */
+function kirim() {
+  if (!postAktif) {
+    alert("Masuk post dulu!");
+    return;
+  }
+  socket.emit("kirim_pesan", {
+    postId: postAktif,
+    isi_pesan: inputPesan.value
+  });
+  socket.emit("berhenti_mengetik", { postId: postAktif });
+  inputPesan.value = "";
+}
 
-      clearTimeout(timeoutMengetik);
-      timeoutMengetik = setTimeout(() => {
-        sedangMengetik = false;
-        socket.emit("berhenti_mengetik");
-      }, 1000);
-    });
+socket.on("pesan_baru", (data) => {
+  tampilkan(`${data.dari}: ${data.isi}`);
+});
 
-    socket.on("user_mengetik", (data) => {
-      indikator.innerText = data.pesan;
-    });
+/* ===== typing ===== */
+let sedangMengetik = false;
+let timeoutMengetik = null;
 
-    socket.on("user_berhenti_mengetik", () => {
-      indikator.innerText = "";
-    });
+inputPesan.addEventListener("input", () => {
+  if (!postAktif) return;
 
-    /* ============================================================
-       NOTIFIKASI SISTEM
-       ============================================================ */
-    socket.on("notifikasi_sistem", (data) => {
-      notifikasi.innerText = data.pesan;
+  if (!sedangMengetik) {
+    sedangMengetik = true;
+    socket.emit("mulai_mengetik", { postId: postAktif });
+  }
 
-      setTimeout(() => {
-        notifikasi.innerText = "";
-      }, 3000);
-    });
-  </script>
+  clearTimeout(timeoutMengetik);
+  timeoutMengetik = setTimeout(() => {
+    sedangMengetik = false;
+    socket.emit("berhenti_mengetik", { postId: postAktif });
+  }, 1000);
+});
+
+socket.on("user_mengetik", d => indikator.innerText = d.pesan);
+socket.on("user_berhenti_mengetik", () => indikator.innerText = "");
+
+/* ===== sistem ===== */
+socket.on("user_online", d => online.innerText = "User online: " + d.jumlah);
+socket.on("notifikasi_sistem", d => {
+  notifikasi.innerText = d.pesan;
+  setTimeout(() => notifikasi.innerText = "", 3000);
+});
+</script>
 
 </body>
 </html>
