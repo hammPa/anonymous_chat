@@ -5,8 +5,11 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const app = express();
 
-const { inisialisasiSocketChat } = require("./socket/chat.socket");
+const { inisialisasiSocketChat } = require("./socket/socket");
 
+require("dotenv").config();
+const koneksiMongo = require("./database/koneksiMongo");
+koneksiMongo();
 
 const PORT = process.env.PORT | 3000;
 const server = http.createServer(app);
