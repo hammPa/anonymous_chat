@@ -21,12 +21,22 @@ app.use(cors({ origin: process.env.LINK_FE }));
 app.use(express.json());
 
 // untuk socket yang khusus ip fe tertentu
+const allowedOrigins = [
+  "https://anonymous-chat-fe-ten.vercel.app"
+];
+
 const io = new Server(server, {
-    cors: {
-        origin: true,
-        methods: ["GET", "POST"],
-        credentials: true
-    }
+  cors: {
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS blocked: " + origin));
+      }
+    },
+    methods: ["GET", "POST"],
+    credentials: true
+  }
 });
 
 // const io = new Server(server, {
