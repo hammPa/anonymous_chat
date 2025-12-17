@@ -38,7 +38,11 @@ function chatHandler(socket, io, context) {
 
     const subscriberList = await Subscription.find({ postId });
 
+    const emailPengirim = data?.emailPengirim;
+
     for (const sub of subscriberList) {
+      if (sub.email === emailPengirim) continue;
+
       await kirimEmail(
         sub.email,
         "Ada curhatan baru",

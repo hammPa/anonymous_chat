@@ -86,6 +86,15 @@ function postHandler(socket, io, context) {
     const email = (data?.email || "").trim();
 
     if (!postId || !email) return;
+    const post = await Post.findById(postId);
+    if (!post) return;
+
+    if (post.pembuatAnonim === `Anonim ${context.idAnonim}`) {
+      socket.emit("subscribe_gagal", {
+        pesan: "Pembuat post tidak perlu subscribe ke post sendiri"
+      });
+      return;
+    }
 
     const sudahAda = await Subscription.findOne({ postId, email });
     if (sudahAda) {
@@ -98,7 +107,6 @@ function postHandler(socket, io, context) {
     await Subscription.create({
       postId,
       email,
-      idAnonim: context.idAnonim
     });
 
     socket.emit("subscribe_berhasil", {

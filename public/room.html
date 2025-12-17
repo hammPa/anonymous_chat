@@ -75,7 +75,11 @@ socket.on("pesan_baru", d => tampilkan(`${d.dari}: ${d.isi}`));
 function kirim() {
   const isi = input.value.trim();
   if (!isi) return;
-  socket.emit("kirim_pesan", { postId, isi_pesan: isi });
+  socket.emit("kirim_pesan", {
+    postId,
+    isi_pesan: isi,
+    emailPengirim: emailSaya
+  });
   socket.emit("berhenti_mengetik", { postId });
   input.value = "";
 }
@@ -102,15 +106,18 @@ socket.on("user_berhenti_mengetik", () => indikator.innerText = "");
 
 
 
+let emailSaya = null;
+
 function subscribe() {
-  const email = document.getElementById("emailSub").value.trim();
-  if (!email) return alert("Isi email");
+  emailSaya = document.getElementById("emailSub").value.trim();
+  if (!emailSaya) return alert("Isi email");
 
   socket.emit("subscribe_post", {
     postId,
-    email
+    email: emailSaya
   });
 }
+
 
 socket.on("subscribe_berhasil", d => alert(d.pesan));
 socket.on("subscribe_gagal", d => alert(d.pesan));
