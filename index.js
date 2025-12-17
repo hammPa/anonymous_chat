@@ -24,7 +24,6 @@ app.use(express.json());
 const io = new Server(server, {
     cors: {
         origin: [process.env.LINK_FE],
-        methods: ["GET", "POST"]
     }
 });
 
