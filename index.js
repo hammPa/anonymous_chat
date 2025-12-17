@@ -11,22 +11,35 @@ require("dotenv").config();
 const koneksiMongo = require("./database/koneksiMongo");
 koneksiMongo();
 
-const PORT = process.env.PORT | 3000;
+const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 
+
+// biasalah untuk api
+app.use(cors({ origin: process.env.LINK_FE }));
+app.use(express.json());
+
+// untuk socket yang khusus ip fe tertentu
 const io = new Server(server, {
     cors: {
-        origin: "*"
+        origin: [process.env.LINK_FE],
+        methods: ["GET", "POST"]
     }
 });
 
+// const io = new Server(server, {
+//     cors: {
+//         origin: "*"
+//     }
+// });
+
 // front end
-app.use(express.static("public"));
+// app.use(express.static("public"));
 
 // inisialisasi socket
 inisialisasiSocketChat(io);
 
 
 server.listen(PORT, () => {
-    console.log("Server berjalan di http://localost:3000");
+    console.log(`Server berjalan di http://localhost:${PORT}`);
 })
