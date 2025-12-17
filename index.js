@@ -23,7 +23,9 @@ app.use(express.json());
 // untuk socket yang khusus ip fe tertentu
 const io = new Server(server, {
     cors: {
-        origin: [process.env.LINK_FE],
+        origin: true,
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 
