@@ -23,7 +23,7 @@ const allowedOrigins = process.env.LINK_FE
 
 // biasalah untuk api
 app.use(cors({
-  origin: allowedOrigins,
+  origin: process.env.LINK_FE,
   credentials: true
 }));
 
