@@ -22,10 +22,14 @@ app.use(cors({ origin: process.env.LINK_FE }));
 app.use(express.json());
 
 // untuk socket yang khusus ip fe tertentu
-const allowedOrigins = [
-  "https://anonymous-chat-fe-ten.vercel.app",
-  "http://localhost:5173" // tambah ini agar bisa di dev
-];
+// const allowedOrigins = [
+//   "https://anonymous-chat-fe-ten.vercel.app",
+//   "http://localhost:5173" // tambah ini agar bisa di dev
+// ];
+
+const allowedOrigins = process.env.LINK_FE
+  ? process.env.LINK_FE.split(",").map(o => o.trim())
+  : [];
 
 const io = new Server(server, {
   cors: {
