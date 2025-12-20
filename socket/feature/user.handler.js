@@ -1,22 +1,24 @@
-const { daftarUser, anonimAktif, ambilIdAnonimKosong } = require("./state");
+const { userAnonMap, anonimAktif, ambilIdAnonimKosong } = require("./state");
 
 
 function daftarUserHandler(socket, io, context) {
-  socket.on("daftar_user", (data) => {
-    const clientId = data?.client_id;
-    if (!clientId) return;
-
+  socket.on("daftar_user", () => {
+    const userId = socket.userId;
+    if (!userId) return;
+0   
     let idAnonim;
-    if (daftarUser.has(clientId)) {
-      idAnonim = daftarUser.get(clientId);
+
+    // 🔒 USER SUDAH PUNYA ANON?
+    if (userAnonMap.has(userId)) {
+      idAnonim = userAnonMap.get(userId);
     } else {
       idAnonim = ambilIdAnonimKosong();
-      daftarUser.set(clientId, idAnonim);
+      userAnonMap.set(userId, idAnonim);
+      anonimAktif.add(idAnonim);
     }
 
-    anonimAktif.add(idAnonim);
     context.idAnonim = idAnonim;
-    context.clientId = clientId;
+    context.userId = userId;
 
     socket.emit("identitas_user", { idAnonim });
 
@@ -31,8 +33,14 @@ function daftarUserHandler(socket, io, context) {
 
 function disconnectHandler(socket, io, context) {
   socket.on("disconnect", () => {
-    const { idAnonim, postAktif } = context;
-    if (idAnonim == null) return;
+    const { userId, idAnonim, postAktif } = context;
+    if (!idAnonim || !userId) return;
+
+    // cek: masih ada socket lain dari user ini?
+    const masihAda = [...socket.server.sockets.sockets.values()]
+      .some(s => s.userId === userId);
+
+    if (masihAda) return; // jangan hapus anon
 
     if (postAktif) {
       socket.to(postAktif).emit("notifikasi_sistem", {
@@ -41,6 +49,7 @@ function disconnectHandler(socket, io, context) {
     }
 
     anonimAktif.delete(idAnonim);
+    userAnonMap.delete(userId)
 
     io.emit("user_online", {
       jumlah: anonimAktif.size

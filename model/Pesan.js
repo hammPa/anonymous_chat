@@ -6,8 +6,13 @@ const PesanSchema = new mongoose.Schema({
     ref: "Post",
     required: true
   },
+  pengirimUser: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
   pengirimAnonim: {
-    type: String,
+    type: Number,
     required: true
   },
   isi: {

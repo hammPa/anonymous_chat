@@ -6,10 +6,10 @@ const typingHandler = require("./feature/typing.handler");
 
 function inisialisasiSocketChat(io) {
   io.on("connection", (socket) => {
-    console.log("Socket connect:", socket.id);
+    console.log("Socket connect:", socket.id, "user: ", socket.userId);
 
     const context = {
-      idAnonim: null,
+      idAnonim: socket.userId,
       clientId: null,
       postAktif: null
     };

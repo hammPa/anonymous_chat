@@ -11,6 +11,7 @@ function chatHandler(socket, io, context) {
 
     if (!postId || !isi) return;
     if (context.postAktif !== postId) return;
+    if (!context.userId || !context.idAnonim) return;
 
     if (mengandungKataKasar(isi)) {
       socket.emit("balasan_bot", {
@@ -21,14 +22,15 @@ function chatHandler(socket, io, context) {
     }
 
     io.to(postId).emit("pesan_baru", {
-      dari: `Anonim ${context.idAnonim}`,
+      dari: context.idAnonim,
       isi,
       waktu: new Date()
     });
 
     await Pesan.create({
       postId,
-      pengirimAnonim: `Anonim ${context.idAnonim}`,
+      pengirimUser: context.userId,
+      pengirimAnonim: context.idAnonim,
       isi
     });
 
@@ -37,7 +39,6 @@ function chatHandler(socket, io, context) {
 
 
     const subscriberList = await Subscription.find({ postId });
-
     const emailPengirim = data?.emailPengirim;
 
     for (const sub of subscriberList) {

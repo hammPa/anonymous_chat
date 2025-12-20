@@ -1,5 +1,5 @@
 // client_id -> nomor anonim
-const daftarUser = new Map();
+const userAnonMap = new Map();
 
 // nomor anonim yang sedang online
 const anonimAktif = new Set();
@@ -12,4 +12,4 @@ function ambilIdAnonimKosong() {
 }
 
 
-module.exports = { daftarUser, anonimAktif, ambilIdAnonimKosong };
+module.exports = { userAnonMap, anonimAktif, ambilIdAnonimKosong };
