@@ -17,25 +17,40 @@ const server = http.createServer(app);
 
 console.log(process.env.LINK_FE);
 
-// biasalah untuk api
-// app.use(cors({ origin: process.env.LINK_FE }));
-app.use(express.json());
-
 const allowedOrigins = process.env.LINK_FE
   ? process.env.LINK_FE.split(",").map(o => o.trim())
   : [];
 
+// biasalah untuk api
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // curl, SSR, proxy
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    // ⬇️ PENTING: JANGAN THROW ERROR
-    return callback(null, false);
-  },
+  origin: allowedOrigins,
   credentials: true
 }));
+
+app.use(express.json());
+
+// untuk socket yang khusus ip fe tertentu
+// const allowedOrigins = [
+//   "https://anonymous-chat-fe-ten.vercel.app",
+//   "http://localhost:5173" // tambah ini agar bisa di dev
+// ];
+
+const io = new Server(server, {
+  cors: {
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("CORS_BLOCKED"));
+    },
+    credentials: true,
+    methods: ["GET", "POST"]
+  }
+});
+
 
 /* 🔐 SOCKET AUTH MIDDLEWARE */
 io.use((socket, next) => {
