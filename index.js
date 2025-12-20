@@ -44,7 +44,7 @@ const io = new Server(server, {
         return callback(null, true);
       }
 
-      return callback(new Error("CORS_BLOCKED"));
+      return callback(null, false);
     },
     credentials: true,
     methods: ["GET", "POST"]
