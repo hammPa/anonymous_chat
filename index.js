@@ -24,14 +24,19 @@ const allowedOrigins = process.env.LINK_FE
 // biasalah untuk api
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // curl / proxy
+    if (!origin) return callback(null, "*"); // curl / postman
+
     if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
+      return callback(null, origin); // ⬅️ INI KUNCI UTAMA
     }
-    return callback(null, false); // JANGAN throw error
+
+    return callback(new Error("CORS_NOT_ALLOWED"));
   },
-  credentials: true
+  credentials: true,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
 
 
 app.use(express.json());
