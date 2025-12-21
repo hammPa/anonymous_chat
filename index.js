@@ -24,16 +24,26 @@ const allowedOrigins = process.env.LINK_FE
 // biasalah untuk api
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin) return callback(null, "*"); // curl / postman
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, origin); // ⬅️ INI KUNCI UTAMA
+    console.log("📍 Request dari origin:", origin);
+    
+    // Request dari server/postman (tidak ada origin)
+    if (!origin) {
+      console.log("✅ No origin (Postman/Server) - ALLOWED");
+      return callback(null, true); // ← UBAH JADI true
     }
 
+    // Cek apakah origin ada di whitelist
+    if (allowedOrigins.includes(origin)) {
+      console.log("✅ Origin allowed:", origin);
+      return callback(null, true); // ← UBAH JADI true
+    }
+
+    // Origin tidak diizinkan
+    console.log("❌ Origin rejected:", origin);
     return callback(new Error("CORS_NOT_ALLOWED"));
   },
   credentials: true,
-  methods: ["GET", "POST", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
