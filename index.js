@@ -40,7 +40,7 @@ aplikasi.use(cors({
 
     // Origin tidak diizinkan
     console.log("Origin ditolak:", origin);
-    return callback(new Error("CORS Tidak diizinkan"));
+    return callback(null, false);
   },
   credentials: false,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
