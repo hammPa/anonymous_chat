@@ -2,7 +2,6 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../model/User");
-const { ambilIdAnonimKosong } = require("../socket/feature/state");
 
 const router = express.Router();
 
@@ -18,26 +17,26 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Password minimal 3 karakter" });
     }
 
-    const existing = await User.findOne({
+    const sudahAda = await User.findOne({
       $or: [{ email }, { username }]
     });
 
-    if (existing) {
+    if (sudahAda) {
       return res.status(400).json({
         error: "Username atau email sudah digunakan"
       });
     }
 
-    const hashed = await bcrypt.hash(password, 10);
+    const terHash = await bcrypt.hash(password, 10);
 
-    const lastUser = await User.findOne().sort({ anonId: -1 }).select("anonId");
-    const newAnonId = lastUser ? lastUser.anonId + 1 : 1;
+    const userTerakhir = await User.findOne().sort({ anonId: -1 }).select("anonId");
+    const anonIdBaru = userTerakhir ? userTerakhir.anonId + 1 : 1;
 
     await User.create({
       username,
       email,
-      password: hashed,
-      anonId: newAnonId
+      password: terHash,
+      anonId: anonIdBaru
     });
 
     res.status(201).json({ message: "Register sukses" });

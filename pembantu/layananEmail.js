@@ -1,10 +1,6 @@
 const nodemailer = require("nodemailer");
-const { renderEmailTemplate } = require("./emailTemplate");
+const { renderTemplateEmail } = require("./templateEmail");
 require("dotenv").config();
-
-console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "ADA" : "KOSONG");
-
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -14,13 +10,14 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// mengiri email notifikasi ke pengguna
 async function kirimEmail({tujuan, subjek, anon, isi, link}) {
   await transporter.sendMail({
     from: `"Tembok Curhat" <${process.env.EMAIL_USER}>`,
     to: tujuan,
     subject: subjek,
     // text: isi
-    html: renderEmailTemplate({anon, isi, link})
+    html: renderTemplateEmail({anon, isi, link})
   });
 }
 

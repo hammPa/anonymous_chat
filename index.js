@@ -4,7 +4,7 @@ const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
 
 const cors = require("cors");
-const app = express();
+const aplikasi = express();
 
 const { inisialisasiSocketChat } = require("./socket/socket");
 
@@ -13,34 +13,34 @@ const koneksiMongo = require("./database/koneksiMongo");
 koneksiMongo();
 
 const PORT = process.env.PORT || 3000;
-const server = http.createServer(app);
+const server = http.createServer(aplikasi);
 
 console.log(process.env.LINK_FE);
 
-const allowedOrigins = process.env.LINK_FE
+// konfiguurasi cors api
+const originDiizinkan = process.env.LINK_FE
   ? process.env.LINK_FE.split(",").map(o => o.trim())
   : [];
 
 // biasalah untuk api
-app.use(cors({
+aplikasi.use(cors({
   origin: (origin, callback) => {
-    console.log("📍 Request dari origin:", origin);
-    
+    // console.log("Request dari origin:", origin);
     // Request dari server/postman (tidak ada origin)
     if (!origin) {
-      console.log("✅ No origin (Postman/Server) - ALLOWED");
-      return callback(null, true); // ← UBAH JADI true
+      console.log("Tanpa Origin (Postman/Server) - diizinkan");
+      return callback(null, true);
     }
 
     // Cek apakah origin ada di whitelist
-    if (allowedOrigins.includes(origin)) {
-      console.log("✅ Origin allowed:", origin);
+    if (originDiizinkan.includes(origin)) {
+      console.log("Origin dibolehkan:", origin);
       return callback(null, true); // ← UBAH JADI true
     }
 
     // Origin tidak diizinkan
-    console.log("❌ Origin rejected:", origin);
-    return callback(new Error("CORS_NOT_ALLOWED"));
+    console.log("Origin ditolak:", origin);
+    return callback(new Error("CORS Tidak diizinkan"));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -49,20 +49,15 @@ app.use(cors({
 
 
 
-app.use(express.json());
+aplikasi.use(express.json());
 
-// untuk socket yang khusus ip fe tertentu
-// const allowedOrigins = [
-//   "https://anonymous-chat-fe-ten.vercel.app",
-//   "http://localhost:5173" // tambah ini agar bisa di dev
-// ];
-
+// konfigurasi socket
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
+      if (originDiizinkan.includes(origin)) {
         return callback(null, true);
       }
 
@@ -74,7 +69,7 @@ const io = new Server(server, {
 });
 
 
-/* 🔐 SOCKET AUTH MIDDLEWARE */
+/* SOCKET MIDDLEWARE */
 io.use((socket, next) => {
   const token = socket.handshake.auth?.token;
   if (!token) return next(new Error("NO_AUTH"));
@@ -88,23 +83,18 @@ io.use((socket, next) => {
   }
 });
 
-// const io = new Server(server, {
-//     cors: {
-//         origin: "*"
-//     }
-// });
 
-// front end
-// app.use(express.static("public"));
 
 // inisialisasi socket
 inisialisasiSocketChat(io);
 
-app.use("/api/auth", require("./routes/auth.routes"));
-app.use("/api/posts", require("./routes/posts.routes"));
-app.use("/api/messages", require("./routes/messages.routes"));
-app.use("/api/profile", require("./routes/profile.routes"));
+
+// routing api
+aplikasi.use("/api/autentikasi", require("./rute/auth.routes"));
+aplikasi.use("/api/postingan", require("./rute/posts.routes"));
+aplikasi.use("/api/pesan", require("./rute/pesan.routes"));
+aplikasi.use("/api/profil", require("./rute/profile.routes"));
 
 server.listen(PORT, () => {
-    console.log(`Server berjalan di http://localhost:${PORT}`);
+  console.log(`Server berjalan di http://localhost:${PORT}`);
 })

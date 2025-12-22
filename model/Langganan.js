@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const SubscriptionSchema = new mongoose.Schema({
+const LanggananSchema = new mongoose.Schema({
   postId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Post",
@@ -17,4 +17,4 @@ const SubscriptionSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model("Subscription", SubscriptionSchema);
+module.exports = mongoose.model("Langganan", LanggananSchema);

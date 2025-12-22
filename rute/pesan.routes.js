@@ -5,11 +5,11 @@ const router = express.Router();
 
 router.get("/:postId", async (req, res) => {
   const { postId } = req.params;
-  const limit = Number(req.query.limit) || 50;
+  const batas = Number(req.query.limit) || 50;
 
   const pesan = await Pesan.find({ postId })
     .sort({ dibuatPada: -1 })
-    .limit(limit);
+    .limit(batas);
 
   res.json(pesan.reverse());
 });

@@ -5,12 +5,12 @@ const User = require("../model/User");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    return res.status(401).json({ error: "NO_AUTH" });
+  const headerOtorisasi = req.headers.authorization;
+  if (!headerOtorisasi) {
+    return res.status(401).json({ error: "Belum terautentikasi" });
   }
 
-  const token = authHeader.split(" ")[1];
+  const token = headerOtorisasi.split(" ")[1];
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
     const user = await User.findById(payload.userId);
     
     if (!user) {
-      return res.status(404).json({ error: "USER_NOT_FOUND" });
+      return res.status(404).json({ error: "Pengguna Tidak Ditemukan" });
     }
 
     res.json({
@@ -27,7 +27,7 @@ router.get("/", async (req, res) => {
       createdAt: user.createdAt
     });
   } catch (err) {
-    return res.status(401).json({ error: "INVALID_TOKEN" });
+    return res.status(401).json({ error: "Token Tidak Valid" });
   }
 });
 

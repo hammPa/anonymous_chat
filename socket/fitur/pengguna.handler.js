@@ -1,27 +1,26 @@
 const User = require("../../model/User");
-const { userAnonMap, anonimAktif, ambilIdAnonimKosong } = require("./state");
 
 
-function daftarUserHandler(socket, io, context){
+function tanganiDaftarPengguna(socket, io, context){
   socket.on("daftar_user", async () => {
-    const userId = socket.userId;
-    if (!userId) return;
+    const idPengguna = socket.userId;
+    if (!idPengguna) return;
 
 
-    const user = await User.findById(userId).select("anonId");
+    const user = await User.findById(idPengguna).select("anonId");
     if (!user) return;
 
-    context.idAnon = user.anonId;
-    context.userId = userId;
+    context.idAnonim = user.anonId;
+    context.idPengguna = idPengguna;
 
     socket.emit("identitas_user", { idAnonim: user.anonId });
 
-    const anonimAktif = new Set(
+    const penggunaAktif = new Set(
       [...io.sockets.sockets.values()]
         .map(s => s.userId)
         .filter(Boolean)
     );
-    io.emit("user_online", { jumlah: anonimAktif.size });
+    io.emit("user_online", { jumlah: penggunaAktif.size });
 
     socket.broadcast.emit("notifikasi_sistem", {
       pesan: `Anonim ${user.anonId} baru saja masuk`
@@ -30,35 +29,35 @@ function daftarUserHandler(socket, io, context){
 }
 
 
-function disconnectHandler(socket, io, context) {
+function tanganiPutusKoneksi(socket, io, context) {
   socket.on("disconnect", () => {
-    const { userId, idAnon, postAktif } = context;
-    if (!idAnon || !userId) return;
+    const { idPengguna, idAnonim, postAktif } = context;
+    if (!idAnonim || !idPengguna) return;
 
     // cek: masih ada socket lain dari user ini?
     const masihAda = [...socket.server.sockets.sockets.values()]
-      .some(s => s.userId === userId);
+      .some(s => s.userId === idPengguna);
 
     if (masihAda) return; // jangan hapus anon
 
     if (postAktif) {
       socket.to(postAktif).emit("notifikasi_sistem", {
-        pesan: `Anonim ${idAnon} keluar dari post`
+        pesan: `Anonim ${idAnonim} keluar dari post`
       });
     }
 
-    const anonimAktif = new Set(
+    const penggunaAktif = new Set(
       [...io.sockets.sockets.values()]
         .map(s => s.userId)
         .filter(Boolean)
     );
 
     io.emit("user_online", {
-      jumlah: anonimAktif.size
+      jumlah: penggunaAktif.size
     });
 
     socket.broadcast.emit("notifikasi_sistem", {
-      pesan: `Anonim ${idAnon} keluar`
+      pesan: `Anonim ${idAnonim} keluar`
     });
   });
 }
@@ -66,6 +65,6 @@ function disconnectHandler(socket, io, context) {
 
 
 module.exports = {
-  daftarUserHandler,
-  disconnectHandler
+  tanganiDaftarPengguna,
+  tanganiPutusKoneksi
 };

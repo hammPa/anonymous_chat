@@ -1,30 +1,28 @@
 const Post = require("../../model/Post");
-const Pesan = require("../../model/Pesan");
 
-function postHandler(socket, io, context) {
-
+function tanganiPost(socket, io, context) {
   socket.on("masuk_post", async (data) => {
-    if (!context.idAnon) return;
+    if (!context.idAnonim) return;
 
-    const postId = data?.postId;
-    if (!postId) return;
+    const idPost = data?.postId;
+    if (!idPost) return;
 
-    const post = await Post.findById(postId);
+    const post = await Post.findById(idPost);
     if (!post) return;
 
     if (context.postAktif) {
       socket.leave(context.postAktif);
     }
 
-    socket.join(postId);
-    context.postAktif = postId;
+    socket.join(idPost);
+    context.postAktif = idPost;
 
     socket.emit("berhasil_masuk_post", {
-      postId,
+      idPost,
       judul: post.judul
     });
 
-    socket.to(postId).emit("notifikasi_sistem", {
+    socket.to(idPost).emit("notifikasi_sistem", {
       pesan: `Anonim ${context.idAnon} masuk ke post`
     });
   });
@@ -32,14 +30,14 @@ function postHandler(socket, io, context) {
   socket.on("keluar_post", () => {
     if (!context.postAktif) return;
 
-    const lama = context.postAktif;
-    socket.leave(lama);
+    const idPostLama = context.postAktif;
+    socket.leave(idPostLama);
     context.postAktif = null;
 
-    socket.to(lama).emit("notifikasi_sistem", {
+    socket.to(idPostLama).emit("notifikasi_sistem", {
       pesan: `Anonim ${context.idAnon} keluar dari post`
     });
   });
 }
 
-module.exports = postHandler;
+module.exports = tanganiPost;

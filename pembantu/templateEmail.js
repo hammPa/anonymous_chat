@@ -1,4 +1,4 @@
-function renderEmailTemplate({ anon, isi, link }) {
+function renderTemplateEmail({ anon, isi, link }) {
   return `
   <!DOCTYPE html>
   <html>
@@ -72,4 +72,4 @@ function renderEmailTemplate({ anon, isi, link }) {
   `;
 }
 
-module.exports = { renderEmailTemplate };
+module.exports = { renderTemplateEmail };

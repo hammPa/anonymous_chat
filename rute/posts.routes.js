@@ -1,7 +1,6 @@
 const express = require("express");
 const Post = require("../model/Post");
-const Subscription = require("../model/Subscription");
-const { userAnonMap } = require("../socket/feature/state");
+const Langganan = require("../model/Langganan");
 const jwt = require("jsonwebtoken");
 const User = require("../model/User");
 
@@ -26,7 +25,7 @@ router.get("/:id", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) {
-      return res.status(404).json({ error: "POST_NOT_FOUND" });
+      return res.status(404).json({ error: "Postingan tidak ditemukan" });
     }
     res.json(post);
   } catch {
@@ -35,21 +34,19 @@ router.get("/:id", async (req, res) => {
 });
 
 const auth = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    return res.status(401).json({ error: "NO_AUTH" });
+  const headerOtorisasi = req.headers.authorization;
+  if (!headerOtorisasi) {
+    return res.status(401).json({ error: "Belum terautentikasi" });
   }
 
-  const token = authHeader.split(" ")[1];
+  const token = headerOtorisasi.split(" ")[1];
   
   try {
-    console.log({"SECRET": process.env.JWT_SECRET});
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = payload.userId;
     next();
   } catch (e) {
-    console.error("JWT VERIFY ERROR:", e.message);
-    return res.status(401).json({ error: "INVALID_TOKEN" });
+    return res.status(401).json({ error: "Token tiak valid" });
   }
 }
 
@@ -91,13 +88,13 @@ router.get("/:postId/subscription-status", auth, async (req, res) => {
   const { postId } = req.params;
   const userId = req.userId;
 
-  const sub = await Subscription.findOne({ postId, userId });
+  const sub = await Langganan.findOne({ postId, userId });
   res.json({ subscribed: !!sub });
 });
 
 
 /**
- * POST subscribe
+ * POST langganan
  */
 router.post("/:postId/subscribe", auth, async (req, res) => {
   const userId = req.userId;
@@ -114,7 +111,7 @@ router.post("/:postId/subscribe", auth, async (req, res) => {
   }
 
   try {
-    await Subscription.create({ postId, userId });
+    await Langganan.create({ postId, userId });
     res.json({ message: "SUBSCRIBED" });
   } catch (err) {
     if (err.code === 11000) {
@@ -126,13 +123,13 @@ router.post("/:postId/subscribe", auth, async (req, res) => {
 
 
 /**
- * DELETE unsubscribe
+ * DELETE batal langganan
  */
 router.delete("/:postId/subscribe", auth, async (req, res) => {
   const userId = req.userId;
   const { postId } = req.params;
 
-  const result = await Subscription.findOneAndDelete({ postId, userId });
+  const result = await Langganan.findOneAndDelete({ postId, userId });
 
   if (!result) {
     return res.status(404).json({ error: "NOT_SUBSCRIBED" });
