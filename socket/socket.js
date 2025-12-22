@@ -9,8 +9,8 @@ function inisialisasiSocketChat(io) {
     console.log("Socket connect:", socket.id, "user: ", socket.userId);
 
     const context = {
-      idAnonim: socket.userId,
-      clientId: null,
+      userId: socket.userId,
+      idAnon: null,
       postAktif: null
     };
 

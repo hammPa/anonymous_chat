@@ -103,7 +103,7 @@ inisialisasiSocketChat(io);
 app.use("/api/auth", require("./routes/auth.routes"));
 app.use("/api/posts", require("./routes/posts.routes"));
 app.use("/api/messages", require("./routes/messages.routes"));
-
+app.use("/api/profile", require("./routes/profile.routes"));
 
 server.listen(PORT, () => {
     console.log(`Server berjalan di http://localhost:${PORT}`);

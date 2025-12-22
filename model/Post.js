@@ -5,6 +5,10 @@ const PostSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  gambar: {
+    type: String,
+    required: true
+  },
   pembuatUser: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

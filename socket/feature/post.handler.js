@@ -4,7 +4,7 @@ const Pesan = require("../../model/Pesan");
 function postHandler(socket, io, context) {
 
   socket.on("masuk_post", async (data) => {
-    if (!context.idAnonim) return;
+    if (!context.idAnon) return;
 
     const postId = data?.postId;
     if (!postId) return;
@@ -25,7 +25,7 @@ function postHandler(socket, io, context) {
     });
 
     socket.to(postId).emit("notifikasi_sistem", {
-      pesan: `Anonim ${context.idAnonim} masuk ke post`
+      pesan: `Anonim ${context.idAnon} masuk ke post`
     });
   });
 
@@ -37,7 +37,7 @@ function postHandler(socket, io, context) {
     context.postAktif = null;
 
     socket.to(lama).emit("notifikasi_sistem", {
-      pesan: `Anonim ${context.idAnonim} keluar dari post`
+      pesan: `Anonim ${context.idAnon} keluar dari post`
     });
   });
 }

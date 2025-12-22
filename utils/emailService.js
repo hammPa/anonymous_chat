@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const { renderEmailTemplate } = require("./emailTemplate");
 require("dotenv").config();
 
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
@@ -13,12 +14,13 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-async function kirimEmail(tujuan, subjek, isi) {
+async function kirimEmail({tujuan, subjek, anon, isi, link}) {
   await transporter.sendMail({
     from: `"Tembok Curhat" <${process.env.EMAIL_USER}>`,
     to: tujuan,
     subject: subjek,
-    text: isi
+    // text: isi
+    html: renderEmailTemplate({anon, isi, link})
   });
 }
 

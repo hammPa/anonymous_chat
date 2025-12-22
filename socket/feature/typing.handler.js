@@ -5,7 +5,7 @@ function typingHandler(socket, context) {
     if (!postId || context.postAktif !== postId) return;
 
     socket.to(postId).emit("user_mengetik", {
-      pesan: `Anonim ${context.idAnonim} sedang mengetik...`
+      pesan: `Anonim ${context.idAnon} sedang mengetik...`
     });
   });
 

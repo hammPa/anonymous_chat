@@ -6,8 +6,9 @@ const SubscriptionSchema = new mongoose.Schema({
     ref: "Post",
     required: true
   },
-  email: {
-    type: String,
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true
   },
   dibuatPada: {
