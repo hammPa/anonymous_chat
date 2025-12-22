@@ -47,7 +47,7 @@ aplikasi.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-aplikasi.options("*", cors());
+aplikasi.use(cors());
 
 
 
