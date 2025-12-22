@@ -70,7 +70,7 @@ const io = new Server(server, {
 
       return callback(null, false);
     },
-    credentials: true,
+    credentials: false,
     methods: ["GET", "POST"]
   }
 });
