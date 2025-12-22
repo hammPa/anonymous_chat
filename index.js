@@ -18,30 +18,34 @@ const server = http.createServer(aplikasi);
 console.log(process.env.LINK_FE);
 
 // konfiguurasi cors api
-// biasalah untuk api
-const originDiizinkan = (process.env.LINK_FE || "")
-  .split(",")
-  .map(o => o.trim());
+const originDiizinkan = process.env.LINK_FE
+  ? process.env.LINK_FE.split(",").map(o => o.trim())
+  : [];
 
+// biasalah untuk api
 aplikasi.use(cors({
   origin: (origin, callback) => {
-    // allow server / socket / devtools
-    if (!origin) return callback(null, true);
+    // console.log("Request dari origin:", origin);
+    // Request dari server/postman (tidak ada origin)
+    if (!origin) {
+      console.log("Tanpa Origin (Postman/Server) - diizinkan");
+      return callback(null, true);
+    }
 
-    const cocok = originDiizinkan.some(o =>
-      origin.startsWith(o)
-    );
+    // Cek apakah origin ada di whitelist
+    if (originDiizinkan.includes(origin)) {
+      console.log("Origin dibolehkan:", origin);
+      return callback(null, true); // ← UBAH JADI true
+    }
 
-    if (cocok) return callback(null, true);
-
-    console.log("❌ CORS API ditolak:", origin);
-    callback(null, false); // JANGAN throw Error
+    // Origin tidak diizinkan
+    console.log("Origin ditolak:", origin);
+    return callback(new Error("CORS Tidak diizinkan"));
   },
-  credentials: false, // ⬅️ INI PENTING
+  credentials: false,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-
 
 
 
