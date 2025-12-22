@@ -25,7 +25,7 @@ const originDiizinkan = process.env.LINK_FE
 // biasalah untuk api
 aplikasi.use(cors({
   origin: (origin, callback) => {
-    // console.log("Request dari origin:", origin);
+    console.log("Request dari origin:", origin);
     // Request dari server/postman (tidak ada origin)
     if (!origin) {
       console.log("Tanpa Origin (Postman/Server) - diizinkan");
@@ -54,6 +54,8 @@ aplikasi.use(express.json());
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
+      console.log("Origin socket: ", origin);
+      
       if (!origin) return callback(null, true);
 
       if (originDiizinkan.includes(origin)) {
