@@ -47,6 +47,12 @@ aplikasi.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
+aplikasi.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 
 
