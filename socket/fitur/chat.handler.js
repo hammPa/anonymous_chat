@@ -1,7 +1,6 @@
 const { mengandungKataKasar } = require("../../pembantu/sensorBahasa");
 const Pesan = require("../../model/Pesan");
-const Langganan = require("../../model/Langganan");
-const { kirimEmail } = require("../../pembantu/layananEmail");
+const kirimKePelanggan = require("../../pembantu/kirimKePelanggan");
 
 
 /**
@@ -45,28 +44,10 @@ function tanganiChat(socket, io, context) {
       });
 
 
-
-
       // kirim ke pelanggan
-      console.log(idPost);
-      
-      const daftarLangganan = await Langganan.find({ postId: idPost }).populate("userId", "email");
-
-      for (const langganan of daftarLangganan) {
-        if (langganan.userId._id.toString() === context.idPengguna) continue;
-
-        
-        const res = await kirimEmail({
-          tujuan: langganan.userId.email,
-          subjek: "Ada curhatan baru",
-          anon: context.idAnonim,
-          isi: `Pesan baru:\n\n"${isi}"`,
-          link: `${process.env.LINK_FE}/post/${idPost}`
-        });
-        console.log({res})
-      }
+      kirimKePelanggan(idPost, context, isi);
     } catch (err) {
-      console.error("❌ GAGAL KIRIM EMAIL:", err.message);
+      console.error("Gagal Mengirim Email:", err.message);
     }
   });
 }

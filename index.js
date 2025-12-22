@@ -76,7 +76,7 @@ io.use((socket, next) => {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    socket.userId = payload.userId; // ← ini penting
+    socket.userId = payload.userId;
     next();
   } catch {
     next(new Error("INVALID_TOKEN"));
