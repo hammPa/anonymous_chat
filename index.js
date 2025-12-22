@@ -69,7 +69,7 @@ const io = new Server(server, {
 });
 
 
-/* SOCKET MIDDLEWARE */
+// SOCKET MIDDLEWARE
 io.use((socket, next) => {
   const token = socket.handshake.auth?.token;
   if (!token) return next(new Error("NO_AUTH"));
@@ -90,7 +90,7 @@ inisialisasiSocketChat(io);
 
 
 // routing api
-aplikasi.use("/api/autentikasi", require("./rute/auth.routes"));
+aplikasi.use("/api/autentikasi", require("./rute/autentikasi.routes"));
 aplikasi.use("/api/postingan", require("./rute/posts.routes"));
 aplikasi.use("/api/pesan", require("./rute/pesan.routes"));
 aplikasi.use("/api/profil", require("./rute/profile.routes"));

@@ -105,7 +105,7 @@ router.post("/:postId/subscribe", auth, async (req, res) => {
     return res.status(404).json({ error: "POST_NOT_FOUND" });
   }
 
-  // ❌ pembuat post tidak boleh subscribe
+  // pembuat post tidak boleh subscribe
   if (post.pembuatUser.toString() === userId) {
     return res.status(403).json({ error: "CANNOT_SUBSCRIBE_OWN_POST" });
   }

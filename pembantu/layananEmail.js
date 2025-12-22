@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 
 // mengiri email notifikasi ke pengguna
 async function kirimEmail({tujuan, subjek, anon, isi, link}) {
-  await transporter.sendMail({
+  return await transporter.sendMail({
     from: `"Tembok Curhat" <${process.env.EMAIL_USER}>`,
     to: tujuan,
     subject: subjek,

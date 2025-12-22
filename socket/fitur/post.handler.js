@@ -1,5 +1,12 @@
 const Post = require("../../model/Post");
 
+/**
+ * Menangani event masuk dan keluar post
+ * - Memindahkan socket ke room post
+ * - Menyimpan post aktif di context
+ * - Mengirim notifikasi sistem ke pengguna lain
+ */
+
 function tanganiPost(socket, io, context) {
   socket.on("masuk_post", async (data) => {
     if (!context.idAnonim) return;

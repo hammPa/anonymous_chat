@@ -4,6 +4,13 @@ const User = require("../model/User");
 
 const router = express.Router();
 
+/**
+ * Endpoint autentikasi user
+ * - Mengambil token dari header Authorization
+ * - Memverifikasi JWT
+ * - Mengambil data user dari database
+ */
+
 router.get("/", async (req, res) => {
   const headerOtorisasi = req.headers.authorization;
   if (!headerOtorisasi) {
