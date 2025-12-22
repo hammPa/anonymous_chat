@@ -47,21 +47,6 @@ aplikasi.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-aplikasi.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (originDiizinkan.includes(origin) || !origin) {
-    res.header("Access-Control-Allow-Origin", origin || "*");
-    res.header("Access-Control-Allow-Credentials", "true");
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
-  }
-  
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200); // ← UBAH JADI 200, BUKAN 204
-  }
-  next();
-});
-
 
 aplikasi.use(express.json());
 
