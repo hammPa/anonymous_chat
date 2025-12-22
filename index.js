@@ -83,6 +83,9 @@ io.use((socket, next) => {
   }
 });
 
+console.log("JWT:", !!process.env.JWT_SECRET);
+console.log("MONGO:", !!process.env.MONGO_URI);
+console.log("LINK_FE:", process.env.LINK_FE);
 
 
 // inisialisasi socket
